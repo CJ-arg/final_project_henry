@@ -1,0 +1,4 @@
+OPENAI_API_KEY=tu_clave_de_openai
+LANGFUSE_PUBLIC_KEY=tu_public_key_de_langfuse
+LANGFUSE_SECRET_KEY=tu_secret_key_de_langfuse
+LANGFUSE_HOST=https://cloud.langfuse.com
