@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 # Load enviroments variables
 load_dotenv()       
 
-class ContestualizationAgent:
+class ContextualizationAgent:
     """
     Agent responsible for structural analysis and mapping between the original
     contract and its amendments.
@@ -13,7 +13,7 @@ class ContestualizationAgent:
     def __init__(self):
         # Using GPT-4o for high-reasoning structural analysis
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
-    def analyze(self, original_text: str, amendments_text: str ):
+    def analyze(self, original_text: str, amendments_text: str, langfuse_handler=None):
         """
         Creates comparative map of the document structures.
         """ 
@@ -32,8 +32,9 @@ class ContestualizationAgent:
         chain = prompt | self.llm
 
         # Execute analysis
+        config = {"callbacks": [langfuse_handler]} if langfuse_handler else {}
         response = chain.invoke({
-            "original": original_text, 
+            "original": original_text,
             "amendment": amendments_text
-            })
+        }, config=config)
         return response.content

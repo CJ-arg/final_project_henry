@@ -16,7 +16,7 @@ class ExtractionAgent:
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
         self.structured_llm = self.llm.with_structured_output(ContractChangeOutput)
         
-    def extract_diff(self, original_text: str, amendment_text: str, structural_map: str):
+    def extract_diff(self, original_text: str, amendment_text: str, structural_map: str, langfuse_handler=None):
         """
         Identifies additions, deletions, and modifications based on the context.
         """
@@ -28,6 +28,7 @@ class ExtractionAgent:
             "2. Deletions (removed clauses, sections, articles or terms)\n"
             "3. Modifications (changes in pricing, dates, obligations or any relevant detail).\n\n"
             "Output must be a strictly validated JSON following the ContractChangeOutput schema."
+            "Output must be in spanish after the english translation."
         )
         
         prompt = ChatPromptTemplate.from_messages([
@@ -42,8 +43,9 @@ class ExtractionAgent:
         # Chain execution
         chain = prompt | self.structured_llm
         
+        config = {"callbacks": [langfuse_handler]} if langfuse_handler else {}
         return chain.invoke({
             "map": structural_map,
             "original": original_text,
             "amendment": amendment_text
-        })
+        }, config=config)

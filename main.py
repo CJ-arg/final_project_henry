@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langfuse.callback import CallbackHandler
+from langfuse.langchain import CallbackHandler
 from src.image_parser import parse_contract_image
 from src.agents.contextualization_agent import ContextualizationAgent
 from src.agents.extraction_agent import ExtractionAgent
@@ -9,12 +9,7 @@ from src.agents.extraction_agent import ExtractionAgent
 load_dotenv()
 
 # Initialize Langfuse Callback Handler for traceability
-
-langfuse_handler = CallbackHandler(
-    api_key=os.environ.get("LANGFUSE_API_KEY"),
-    secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-    host=os.getenv("LANGFUSE_BASE_URL")
-)   
+langfuse_handler = CallbackHandler()
 
 def run_analysis_pipeline(original_path, amendment_path, langfuse_handler):
     """
@@ -32,27 +27,26 @@ def run_analysis_pipeline(original_path, amendment_path, langfuse_handler):
     # Step 2 Contextualization
     print("Step 2 Analyzing document Structure...")
     agent_1 = ContextualizationAgent()
-    structural_map = agent_1.analyze(original_text, amendment_text)
+    structural_map = agent_1.analyze(original_text, amendment_text, langfuse_handler=langfuse_handler)
 
     # Step 3 Extraction and Validation
     print("Step 3 Extracting changes and validating with LLM and Pydantic model...")
     agent_2 = ExtractionAgent()
     # The oputput is automatically validated by the Pydantic model defined in models
-    final_report = agent_2.extract_diff(original_text, amendment_text, structural_map)
+    final_report = agent_2.extract_diff(original_text, amendment_text, structural_map, langfuse_handler=langfuse_handler)
 
     print("--- Analysis Pipeline Completed ---")
     return final_report 
 
 if __name__ == "__main__":
     # Test paths - Ensure these images exist in your data/test_contracts folder
-    ORIGINAL_IMG = "data\test_contracts/original.jpg"
-    AMENDMENT_IMG = "data\test_contracts/amendment.jpg"
-    run_analysis_pipeline(ORIGINAL_IMG, AMENDMENT_IMG)
+    ORIGINAL_IMG = "data/test_contracts/original.jpg"
+    AMENDMENT_IMG = "data/test_contracts/amendment.jpg"
 
     if os.path.exists(ORIGINAL_IMG) and os.path.exists(AMENDMENT_IMG):
         # We pass the langfuse_handler to ensure every step is recorded
         result = run_analysis_pipeline(ORIGINAL_IMG, AMENDMENT_IMG, langfuse_handler=langfuse_handler)
-        print("/n FINAL STRUCTURED REPORT (JSON): ")
+        print("\n FINAL STRUCTURED REPORT (JSON): ")
         print(result.model_dump_json(indent=2))
     else:
         print(f"Error: Images not found at {ORIGINAL_IMG} or {AMENDMENT_IMG}")
