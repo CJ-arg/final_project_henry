@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field
 from typing import List
 
 class ContractChangeOutput(BaseModel):
-    """ validated output schema for the contract chande analysis report"""
+    """ Validated output schema for the contract chande analysis report
+        This model ensures the AI provides structured and consistent data.
+    """
 
 sections_changed: List[str] = Field(
     description="List of exact clause identifieers or section numbers that were modified (e.g., 'Section 3', 'Clause 4.1')."
