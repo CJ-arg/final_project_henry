@@ -40,8 +40,8 @@ def run_analysis_pipeline(original_path, amendment_path, langfuse_handler):
 
 if __name__ == "__main__":
     # Test paths - Ensure these images exist in your data/test_contracts folder
-    ORIGINAL_IMG = "data/test_contracts/original.jpg"
-    AMENDMENT_IMG = "data/test_contracts/amendment.jpg"
+    ORIGINAL_IMG = "data/test_contracts/original_1.jpg"
+    AMENDMENT_IMG = "data/test_contracts/amendment_2.jpg"
 
     if os.path.exists(ORIGINAL_IMG) and os.path.exists(AMENDMENT_IMG):
         # We pass the langfuse_handler to ensure every step is recorded
