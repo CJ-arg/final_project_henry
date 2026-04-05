@@ -22,12 +22,20 @@ def parse_contract_image(image_path):
    # Encode image to base64
    base_64_image = encode_image(image_path)
 
+   system_instructions = (
+        "You are a highly accurate Document Digitization Specialist. "
+        "Your task is to transcribe the following legal document image into raw text for archival purposes. "
+        "Maintain the exact numbering, clause titles, and layout. "
+        "If you see signatures or sensitive handwritten data, just represent them as [Signature] or [Handwritten text]. "
+        "Do not omit any printed text."
+    )
+
    #Create the multimodal message payload
    message = HumanMessage(
       content=[
          {
             "type": "text",
-            "text": "Extract the full text of this contract faithfully. Maintain the exact numbering, clause titles, and layout structure."
+            "text": system_instructions
          },
          {
             "type": "image_url",
