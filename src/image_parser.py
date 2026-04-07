@@ -12,7 +12,7 @@ def encode_image(image_path):
    with open(image_path, "rb") as image_file:
       return base64.b64encode(image_file.read()).decode('utf-8')
 
-def parse_contract_image(image_path):
+def parse_contract_image(image_path, langfuse_handler=None):
    """
    Sends the image to GPT-4o Vision to extract the full text while mainteining the exact numbering, clause titles, and layout structure."  
    """
@@ -47,7 +47,10 @@ def parse_contract_image(image_path):
       ]
    )  
    # Invoke the model and return the estacted text content
-   response = model.invoke([message])
+   config = {"callbacks": [langfuse_handler]} if langfuse_handler else {}
+   
+   # Invoke the model passing the configuration for Langfuse
+   response = model.invoke([message], config=config)
    return response.content
 
 
