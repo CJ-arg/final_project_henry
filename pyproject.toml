@@ -9,5 +9,6 @@ dependencies = [
     "langchain-openai>=1.1.12",
     "langfuse>=4.0.6",
     "pydantic>=2.12.5",
+    "pymupdf>=1.27.2.2",
     "python-dotenv>=1.2.2",
 ]
