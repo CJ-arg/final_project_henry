@@ -64,8 +64,8 @@ def validate_paths(paths):
 if __name__ == "__main__":
     # --- CONFIGURATION ---
     # Put the paths to your PDF files or images here
-    ORIGINAL_INPUT = "data/test_contracts/CONTRATO DE ALQUILER version 1 henry.pdf"
-    AMENDMENT_INPUT = "data/test_contracts/CONTRATO DE ALQUILER version 2 henry.pdf"
+    ORIGINAL_INPUT = "data/test_contracts/original.jpg"
+    AMENDMENT_INPUT = "data/test_contracts/amendment.jpg"
 
     # --- INTELLIGENT INPUT PROCESSING ---
     
