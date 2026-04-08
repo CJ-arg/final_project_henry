@@ -8,39 +8,50 @@ from src.pdf_processor import convert_pdf_to_images
 from src.agents.contextualization_agent import ContextualizationAgent
 from src.agents.extraction_agent import ExtractionAgent
 
-# Load environment variables (API Keys, Langfuse, etc.)
+from pydantic import ValidationError
+from langfuse.langchain import CallbackHandler
+from dotenv import load_dotenv
+
 load_dotenv()
 
-# Initialize Langfuse Callback Handler for full traceability
-langfuse_handler = CallbackHandler()
-
-def run_analysis_pipeline(original_paths, amendment_paths, langfuse_handler):
+def run_analysis_pipeline(original_paths, amendment_paths):
     """
     Main orchestrator that manages the flow between vision parser and agents.
     Supports multi-page contracts by accepting lists of image paths.
     """
     print("\n--- Starting LegalMove Analysis Pipeline ---")
+    
+    # Initialize a single CallbackHandler for the whole pipeline
+    # Passing the same handler instance groups all invoke() calls under the same trace
+    handler = CallbackHandler()
 
-    # Step 1: Vision Parsing (OCR)
-    # We pass the langfuse_handler to see "Contract_OCR_Vision" in the dashboard
-    print("Step 1: Parsing images (Vision Mode)...")
-    original_text = parse_contract_image(original_paths, langfuse_handler=langfuse_handler)
-    amendment_text = parse_contract_image(amendment_paths, langfuse_handler=langfuse_handler)   
+    try:
+        # Step 1: Vision Parsing (OCR)
+        print("Step 1: Parsing images (Vision Mode)...")
+        original_text = parse_contract_image(original_paths, run_name="parse_original_contract", langfuse_handler=handler)
+        amendment_text = parse_contract_image(amendment_paths, run_name="parse_amendment_contract", langfuse_handler=handler)   
 
-    # Step 2: Contextualization
-    # Agent 1 maps the structure of both documents
-    print("Step 2: Analyzing document structure...")
-    agent_1 = ContextualizationAgent()
-    structural_map = agent_1.analyze(original_text, amendment_text, langfuse_handler=langfuse_handler)
+        # Step 2: Contextualization
+        print("Step 2: Analyzing document structure...")
+        agent_1 = ContextualizationAgent()
+        structural_map = agent_1.analyze(original_text, amendment_text, run_name="contextualization_agent", langfuse_handler=handler)
 
-    # Step 3: Extraction and Validation
-    # Agent 2 finds the differences and returns a validated Pydantic model
-    print("Step 3: Extracting changes and validating with Pydantic...")
-    agent_2 = ExtractionAgent()
-    final_report = agent_2.extract_diff(original_text, amendment_text, structural_map, langfuse_handler=langfuse_handler)
+        # Step 3: Extraction and Validation
+        print("Step 3: Extracting changes and validating with Pydantic...")
+        agent_2 = ExtractionAgent()
+        final_report = agent_2.extract_diff(original_text, amendment_text, structural_map, run_name="extraction_agent", langfuse_handler=handler)
 
-    print("--- Analysis Pipeline Completed ---\n")
-    return final_report 
+        print("--- Analysis Pipeline Completed ---\n")
+        return final_report
+        
+    except ValidationError as ve:
+        print("\n[Error de Validación] El modelo de lenguaje devolvió un formato incorrecto que no cumple con el esquema esperado:")
+        print(ve)
+        return None
+    except Exception as e:
+        print("\n[Error en Pipeline] Ha ocurrido un error inesperado al procesar el contrato:")
+        print(e)
+        return None 
 
 def validate_paths(paths):
     """
@@ -78,12 +89,14 @@ if __name__ == "__main__":
     if validate_paths(ORIGINAL_IMG_LIST) and validate_paths(AMENDMENT_IMG_LIST):
         result = run_analysis_pipeline(
             ORIGINAL_IMG_LIST, 
-            AMENDMENT_IMG_LIST, 
-            langfuse_handler=langfuse_handler
+            AMENDMENT_IMG_LIST
         )
         
-        print("FINAL STRUCTURED REPORT (JSON):")
-        print(result.model_dump_json(indent=2))
+        if result:
+            print("FINAL STRUCTURED REPORT (JSON):")
+            print(result.model_dump_json(indent=2))
+        else:
+            print("El proceso terminó sin un resultado válido.")
     else:
         print(f"Error: Some files were not found.")
         print(f"Original list: {ORIGINAL_IMG_LIST}")

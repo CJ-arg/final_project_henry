@@ -13,7 +13,7 @@ class ContextualizationAgent:
     def __init__(self):
         # Using GPT-4o for high-reasoning structural analysis
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
-    def analyze(self, original_text: str, amendments_text: str, langfuse_handler=None):
+    def analyze(self, original_text: str, amendments_text: str, run_name="contextualization_agent", langfuse_handler=None):
         """
         Creates comparative map of the document structures.
         """ 
@@ -32,9 +32,21 @@ class ContextualizationAgent:
         chain = prompt | self.llm
 
         # Execute analysis
-        config = {"callbacks": [langfuse_handler]} if langfuse_handler else {}
-        response = chain.invoke({
-            "original": original_text,
-            "amendment": amendments_text
-        }, config=config)
-        return response.content
+        config = {"callbacks": [langfuse_handler], "run_name": run_name} if langfuse_handler else {"run_name": run_name}
+        
+        # Simple try-except retry logic
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = chain.invoke({
+                    "original": original_text,
+                    "amendment": amendments_text
+                }, config=config)
+                return response.content
+            except Exception as e:
+                print(f"[ContextualizationAgent] Error en intento {attempt + 1}/{max_retries}: {e}")
+                if attempt == max_retries - 1:
+                    print("[ContextualizationAgent] Fallo definitivo tras reintentos.")
+                    raise e
+                time.sleep(2)

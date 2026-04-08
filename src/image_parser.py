@@ -12,7 +12,7 @@ def encode_image(image_path):
    with open(image_path, "rb") as image_file:
       return base64.b64encode(image_file.read()).decode('utf-8')
 
-def parse_contract_image(image_paths, langfuse_handler=None):
+def parse_contract_image(image_paths, run_name="Contract_OCR_Vision", langfuse_handler=None):
    """
    Sends the image to GPT-4o Vision to extract the full text while mainteining the exact numbering, clause titles, and layout structure."  
    """
@@ -50,11 +50,23 @@ def parse_contract_image(image_paths, langfuse_handler=None):
     # Configure Langfuse with a specific run_name for better observability
    config = {
         "callbacks": [langfuse_handler],
-        "run_name": "Contract_OCR_Vision"
-    } if langfuse_handler else {"run_name": "Contract_OCR_Vision"}
+        "run_name": run_name
+    } if langfuse_handler else {"run_name": run_name}
     
-    # Invoke the model passing the configuration for Langfuse
-   response = model.invoke([message], config=config)
-   return response.content
+    # Try-except retry logic
+   import time
+   max_retries = 3
+   for attempt in range(max_retries):
+       try:
+           # Invoke the model passing the configuration for Langfuse
+           response = model.invoke([message], config=config)
+           return response.content
+       except Exception as e:
+           print(f"[ImageParser ({config.get('run_name', 'Vision')})] Error en intento {attempt + 1}/{max_retries}: {e}")
+           if attempt == max_retries - 1:
+               print(f"[ImageParser] Fallo definitivo tras reintentos.")
+               raise e
+           time.sleep(2)
+
 
 
