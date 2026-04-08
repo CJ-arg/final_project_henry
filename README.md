@@ -40,7 +40,7 @@ A diferencia de sistemas robustos documentales que fragmentan la información, L
 
 ---
 
-## 💻 Instalación y Configuración (Setup)
+## Instalación y Configuración (Setup)
 
 Este proyecto emplea `uv`, el administrador de paquetes unificado de Rust para lidiar con el infierno de dependencias.
 
@@ -64,7 +64,7 @@ Este proyecto emplea `uv`, el administrador de paquetes unificado de Rust para l
 
 ---
 
-## 🚀 Uso Rápido (Quickstart)
+## Uso Rápido (Quickstart)
 
 El orquestador en `main.py` está configurado para operar la base de imágenes PDF. En caso de usar imágenes estándar, se puede editar las rutas provistas al pipeline.
 
@@ -82,8 +82,10 @@ Al terminar de parsear las imágenes y traspasarlas de un agente al otro, el log
 }
 ```
 
-## 📊 Trazabilidad en Langfuse
+## Trazabilidad en Langfuse
 Cada operación realizada interactúa con `langfuse`. La instancia y sesión es global configurada nativamente como `CallbackHandler()`, generando trazas secuenciales nombradas directamente con `run_name=` en el backend. Revisen su endpoint en *Cloud* para visualizar el _Span Hierarchy_ con su latencia, tokens y coste por etapa (Parsing, Análisis, Extracción).
+
+![alt text](image-1.png)
 
 ### Topología de Ejecución (LangChain & Langfuse)
 Para demostrar la instrumentación, este diagrama ejemplifica cómo se mapean los flujos internos de manera individual en el panel de Langfuse durante la corrida de los agentes (ej. el agente de contextualización):
@@ -108,3 +110,5 @@ graph TD
 
 ## Pruebas Adicionales
 Otro par de contratos y adendas de demostración se encuentra en `/data/test_contracts`, detallados en su propio `README.md` localizado ahí mismo.
+
+
