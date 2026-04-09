@@ -1,17 +1,13 @@
 import os
 from dotenv import load_dotenv
+from pydantic import ValidationError
 from langfuse.langchain import CallbackHandler
-
-# Custom module imports
 from src.image_parser import parse_contract_image
 from src.pdf_processor import convert_pdf_to_images
 from src.agents.contextualization_agent import ContextualizationAgent
 from src.agents.extraction_agent import ExtractionAgent
 
-from pydantic import ValidationError
-from langfuse.langchain import CallbackHandler
-from dotenv import load_dotenv
-
+# Load environment variables (API Keys, Langfuse, etc.)
 load_dotenv()
 
 def run_analysis_pipeline(original_paths, amendment_paths):
