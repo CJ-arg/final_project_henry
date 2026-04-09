@@ -33,7 +33,7 @@ graph TD
 Se encarga de identificar qué partes del documento de adenda referencian secciones específicas del esquema principal (original). Elimina el riesgo de "alucinación" ordenando la lectura.
 
 ### Agente 2: Extraction Agent
-Recibe dicho Mapa Estructural y extrae con exactitud legal las _adiciones, borrados y modificaciones_. Garantiza que la respuesta se restrinja y emita el esquema Pydantic para los atributos `sections_changed`, `topics_touched` y `summary_of_changes`.
+Recibe dicho Mapa Estructural y extrae con exactitud legal las _adiciones, borrados y modificaciones_. Garantiza que la respuesta se restrinja y emita el esquema Pydantic para los atributos `sections_changed`, `topics_touched` y `summary_of_the_change`.
 
 ### Justificación: Long-Context vs RAG
 A diferencia de sistemas robustos documentales que fragmentan la información, LegalMove utiliza una Ingestión de Contexto Largo (*Long-Context*). Debido a que un contrato típico y su adenda suelen pesar una cantidad de tokens asimilable, proveer las actas completas previene el quiebre de la semántica obligatoria evitando un falso positivo ocasionado por la vectorización de bases de datos de un escenario RAG clásico, priorizando la precisión (determinística) por encima del almacenamiento.
@@ -78,7 +78,7 @@ Al terminar de parsear las imágenes y traspasarlas de un agente al otro, el log
 {
   "sections_changed": ["CUARTA", "QUINTA"],
   "topics_touched": ["Duration", "Pricing"],
-  "summary_of_changes": "Se modificó la cláusula CUARTA extendiendo..."
+  "summary_of_the_change": "Se modificó la cláusula CUARTA extendiendo..."
 }
 ```
 
@@ -111,4 +111,17 @@ graph TD
 ## Pruebas Adicionales
 Otro par de contratos y adendas de demostración se encuentra en `/data/test_contracts`, detallados en su propio `README.md` localizado ahí mismo.
 
+## Tests Unitarios (Pytest)
 
+El proyecto incluye una suite de tests automatizados que validan cada componente **sin consumir tokens de la API** (todas las llamadas a OpenAI están mockeadas con `unittest.mock`).
+
+```bash
+uv run pytest tests/ -v
+```
+
+| Suite | Archivo | Qué valida |
+|:---|:---|:---|
+| **Modelo Pydantic** | `tests/test_models.py` | Que el schema `ContractChangeOutput` acepte datos válidos, rechace campos faltantes y tipos incorrectos, y serialice correctamente a JSON. |
+| **Image Parser** | `tests/test_image_parser.py` | Que `encode_image()` genere base64 válido, que `parse_contract_image()` normalice inputs (string vs lista) y que la lógica de reintentos funcione ante fallos de API. |
+| **Agentes** | `tests/test_agents.py` | Que el `ContextualizationAgent` retorne un string (mapa estructural) y el `ExtractionAgent` retorne una instancia de `ContractChangeOutput`, incluyendo reintentos. |
+| **Pipeline E2E** | `tests/test_pipeline.py` | Que el flujo completo orquestado en `main.py` devuelva un resultado válido, y que los errores de validación (`ValidationError`) y excepciones genéricas se capturen sin romper la ejecución. |

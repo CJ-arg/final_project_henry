@@ -53,7 +53,7 @@ class TestRunAnalysisPipeline:
         expected = ContractChangeOutput(
             sections_changed=["PRIMERA"],
             topics_touched=["Duración"],
-            summary_of_changes="El plazo se extendió de 2 a 3 años."
+            summary_of_the_change="El plazo se extendió de 2 a 3 años."
         )
         mock_ext = MagicMock()
         mock_ext.extract_diff.return_value = expected

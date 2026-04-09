@@ -75,7 +75,7 @@ class TestExtractionAgent:
         expected_output = ContractChangeOutput(
             sections_changed=["PRIMERA"],
             topics_touched=["Duración"],
-            summary_of_changes="El plazo se extendió de 2 a 3 años."
+            summary_of_the_change="El plazo se extendió de 2 a 3 años."
         )
 
         mock_model = MagicMock()
@@ -105,7 +105,7 @@ class TestExtractionAgent:
         expected_output = ContractChangeOutput(
             sections_changed=["PRIMERA"],
             topics_touched=["Duración"],
-            summary_of_changes="Recuperado tras reintento."
+            summary_of_the_change="Recuperado tras reintento."
         )
 
         mock_model = MagicMock()

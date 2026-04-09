@@ -12,6 +12,6 @@ class ContractChangeOutput(BaseModel):
     topics_touched: List[str] = Field(
         description="Legal or commercial categories affected by the changes, such as 'Pricing', 'Support', 'Duration', or 'Intellectual Property'."
     )
-    summary_of_changes: str = Field(
+    summary_of_the_change: str = Field(
         description="Detailed professional narrative describing exactly what changed, including old vs. new values and the legal impact"
     )
